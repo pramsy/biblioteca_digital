@@ -1,20 +1,16 @@
-# Sistema de Biblioteca Digital - UAB IFTO
+# Sistema de Biblioteca Digital
 
-Sistema de gerenciamento de biblioteca digital focado em acessibilidade, responsividade e experiência do usuário.
+Este é um sistema de gerenciamento de biblioteca digital desenvolvido com Flask e SQLite, seguindo uma arquitetura modular e práticas de TDD.
 
-## 🚀 Novidades da Versão (Refinamento Frontend)
+## 🚀Funcionalidade
 
-Esta versão foca na modernização da interface e melhoria da acessibilidade:
-- **Design System**: Padronização visual baseada em Bootstrap 5 com feedback tátil e visual.
-- **Acessibilidade**: Conformidade básica com WCAG (ARIA roles, contraste, navegação por teclado).
-- **Responsividade**: Layout adaptável para Mobile, Tablet e Desktop.
-- **Validations & Feedback**: Estados de carregamento (spinners), validações em tempo real e mensagens claras.
+Autenticação e Autorização: Controle de acesso baseado em papéis (Admin Inicial, Admin, Bibliotecário e Leitor).
+Gestão de Livros: Catálogo completo com busca por título, autor e categoria.
+Fluxo de Empréstimos: Ciclo completo de solicitação, aprovação e devolução de livros.
+Relatórios: Métricas de uso do sistema para administradores.
 
-## 📋 Documentação
+## 📋 Requisitos tecnicos
 
-A documentação detalhada foi subdividida para melhor manutenção:
-- [Especificação de Requisitos e UI](01markdow.md)
-- [Plano de Testes de Frontend](doc/testing.md)
 
 ## 🛠️ Tecnologias
 
@@ -48,9 +44,12 @@ cd biblioteca_digital
 PYTHONPATH=. pytest
 ```
 
-## ♿ Acessibilidade
+## Estrutura
 
-O sistema foi testado para garantir:
-- Navegação lógica via tecla `TAB`.
-- Indicações visuais de foco em todos os elementos interativos.
-- Suporte a leitores de tela através de atributos ARIA.
+app/: Código fonte da aplicação.
+controllers/: Gerenciamento de rotas e lógica de negócio.
+models/: Definições de dados e persistência.
+templates/: Interface do usuário (HTML/Jinja2).
+tests/: Testes automatizados (TDD).
+config.py: Configurações centralizadas.
+run.py: Ponto de entrada.
