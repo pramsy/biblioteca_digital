@@ -1,103 +1,150 @@
 {% extends "layout.html" %}
 {% block title %}Painel Administrativo - Biblioteca Digital{% endblock %}
+
 {% block content %}
-<div class="row">
-    <div class="col-md-4">
-        <div class="card p-4 mb-4">
-            <h4>Cadastrar Novo Livro</h4>
-            <hr>
-            <form action="{{ url_for('livro.cadastrar_livro') }}" method="POST">
-                <div class="mb-3">
-                    <label class="form-label">Título</label>
-                    <input type="text" name="titulo" class="form-control" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Autor</label>
-                    <input type="text" name="autor" class="form-control" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Categoria</label>
-                    <input type="text" name="categoria" class="form-control" required>
-                </div>
-                <button type="submit" class="btn btn-primary w-100">Cadastrar Livro</button>
-            </form>
-        </div>
+<header class="mb-4">
+    <h1 class="h2 fw-bold">Painel de Gestão</h1>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('livro.listar_livros') }}">Catálogo</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Administração</li>
+        </ol>
+    </nav>
+</header>
+
+<div class="row g-4">
+    <!-- Formulário de Cadastro de Livro -->
+    <div class="col-lg-4">
+        <section class="card shadow-sm border-0 h-100" aria-labelledby="form-title">
+            <div class="card-body p-4">
+                <h2 id="form-title" class="h5 fw-bold mb-4">🆕 Cadastrar Novo Livro</h2>
+                <form action="{{ url_for('livro.cadastrar_livro') }}" method="POST" class="needs-validation" novalidate>
+                    <div class="mb-3">
+                        <label for="titulo" class="form-label fw-semibold">Título <span class="text-danger">*</span></label>
+                        <input type="text" id="titulo" name="titulo" class="form-control" required placeholder="Título do livro">
+                    </div>
+                    <div class="mb-3">
+                        <label for="autor" class="form-label fw-semibold">Autor <span class="text-danger">*</span></label>
+                        <input type="text" id="autor" name="autor" class="form-control" required placeholder="Nome do autor">
+                    </div>
+                    <div class="mb-3">
+                        <label for="categoria" class="form-label fw-semibold">Categoria <span class="text-danger">*</span></label>
+                        <input type="text" id="categoria" name="categoria" class="form-control" required placeholder="Ex: Ciência, Ficção">
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">
+                        Cadastrar no Acervo
+                    </button>
+                </form>
+            </div>
+        </section>
     </div>
 
-    <div class="col-md-8">
-        <div class="card p-4 mb-4">
-            <h4>Gerenciar Empréstimos</h4>
-            <hr>
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>Livro</th>
-                            <th>Usuário</th>
-                            <th>Status</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for emp in emprestimos %}
-                        <tr>
-                            <td>{{ emp.titulo }}</td>
-                            <td>{{ emp.usuario }}</td>
-                            <td>
-                                {% if emp.status == 'SOLICITADO' %}
-                                    <span class="badge bg-warning text-dark">Pendente</span>
-                                {% else %}
-                                    <span class="badge bg-info">Ativo</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if emp.status == 'SOLICITADO' %}
-                                    <form action="{{ url_for('emprestimo.aprovar_emprestimo') }}" method="POST" class="d-inline">
-                                        <input type="hidden" name="emprestimo_id" value="{{ emp.id }}">
-                                        <button type="submit" class="btn btn-success btn-sm">Aprovar</button>
-                                    </form>
-                                {% elif emp.status == 'ATIVO' %}
-                                    <form action="{{ url_for('emprestimo.devolver_emprestimo') }}" method="POST" class="d-inline">
-                                        <input type="hidden" name="emprestimo_id" value="{{ emp.id }}">
-                                        <button type="submit" class="btn btn-primary btn-sm">Receber Devolução</button>
-                                    </form>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% else %}
-                        <tr>
-                            <td colspan="4" class="text-center text-muted">Nenhuma solicitação ou empréstimo ativo.</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+    <!-- Tabela de Empréstimos -->
+    <div class="col-lg-8">
+        <section class="card shadow-sm border-0 mb-4" aria-labelledby="loans-title">
+            <div class="card-body p-4">
+                <h2 id="loans-title" class="h5 fw-bold mb-4">🤝 Gerenciar Empréstimos</h2>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Livro</th>
+                                <th>Usuário</th>
+                                <th>Status</th>
+                                <th class="text-end">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for emp in emprestimos %}
+                            <tr>
+                                <td class="fw-medium">{{ emp.titulo }}</td>
+                                <td>{{ emp.usuario }}</td>
+                                <td>
+                                    {% if emp.status == 'SOLICITADO' %}
+                                        <span class="badge bg-warning text-dark">Pendente</span>
+                                    {% elif emp.status == 'ATIVO' %}
+                                        <span class="badge bg-info">Ativo</span>
+                                    {% else %}
+                                        <span class="badge bg-success">Devolvido</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    {% if emp.status == 'SOLICITADO' %}
+                                        <form action="{{ url_for('emprestimo.aprovar_emprestimo') }}" method="POST" class="d-inline">
+                                            <input type="hidden" name="emprestimo_id" value="{{ emp.id }}">
+                                            <button type="submit" class="btn btn-success btn-sm px-3">Aprovar</button>
+                                        </form>
+                                    {% elif emp.status == 'ATIVO' %}
+                                        <form action="{{ url_for('emprestimo.devolver_emprestimo') }}" method="POST" class="d-inline">
+                                            <input type="hidden" name="emprestimo_id" value="{{ emp.id }}">
+                                            <button type="submit" class="btn btn-primary btn-sm px-3">Receber Devolução</button>
+                                        </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center py-4 text-muted">
+                                    <div class="mb-2">📭</div>
+                                    Nenhuma solicitação ou empréstimo ativo no momento.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        </div>
+        </section>
 
-        <div class="card p-4">
-            <h4>Acervo Atual</h4>
-            <hr>
-            <div class="table-responsive">
-                <table class="table table-sm">
-                    <thead>
-                        <tr>
-                            <th>Título</th>
-                            <th>Autor</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for livro in livros %}
-                        <tr>
-                            <td>{{ livro.titulo }}</td>
-                            <td>{{ livro.autor }}</td>
-                            <td>{{ livro.status }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+        <!-- Acervo Resumido -->
+        <section class="card shadow-sm border-0" aria-labelledby="collection-title">
+            <div class="card-body p-4">
+                <h2 id="collection-title" class="h5 fw-bold mb-4">📚 Acervo Atual</h2>
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Título</th>
+                                <th>Autor</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for livro in livros %}
+                            <tr>
+                                <td>{{ livro.titulo }}</td>
+                                <td>{{ livro.autor }}</td>
+                                <td>
+                                    {% if livro.status == 'DISPONIVEL' %}
+                                        <span class="badge rounded-pill bg-success-subtle text-success border border-success">Disponível</span>
+                                    {% else %}
+                                        <span class="badge rounded-pill bg-danger-subtle text-danger border border-danger">Emprestado</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        </div>
+        </section>
     </div>
 </div>
+
+<script>
+    // Script de validação do Bootstrap
+    (function () {
+        'use strict'
+        var forms = document.querySelectorAll('.needs-validation')
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                form.classList.add('was-validated')
+            }, false)
+        })
+    })()
+</script>
 {% endblock %}

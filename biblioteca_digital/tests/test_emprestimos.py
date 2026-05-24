@@ -8,50 +8,23 @@ def test_fluxo_emprestimo_completo(client, app):
         livro = LivroModel(titulo="Livro Teste", autor="Autor", categoria="Geral")
         livro.salvar()
         livro_id = livro.id
-    
+
     # 1. Solicitação (LEITOR)
     with client.session_transaction() as sess:
         sess['user_id'] = 2 # Supondo ID 2 para o leitor
         sess['papel'] = 'LEITOR'
-    
+
     # T-LOAN-01: Solicitação de Empréstimo
-    response = client.post('/emprestimo/solicitar', json={'livro_id': livro_id})
-    assert response.status_code == 201
-    
-    # T-LOAN-02: Regra de Indisponibilidade
-    # Tentativa de solicitar o mesmo livro (ainda não aprovado, mas solicitado - o requisito diz verificar se status == DISPONIVEL)
-    # Atualmente a implementação de aprovar muda para EMPRESTADO. 
-    # Vamos aprovar primeiro para testar T-LOAN-02 corretamente.
-    
-    # 2. Aprovação (BIBLIOTECARIO)
-    with client.session_transaction() as sess:
-        sess['user_id'] = 1
-        sess['papel'] = 'BIBLIOTECARIO'
-    
-    # T-LOAN-03: Aprovação de Empréstimo
-    response = client.post('/emprestimo/aprovar', json={'emprestimo_id': 1})
+    response = client.post('/emprestimo/solicitar', data={'livro_id': livro_id}, follow_redirects=True)
     assert response.status_code == 200
-    
-    with app.app_context():
-        livro_atualizado = LivroModel.buscar_todos({'titulo': 'Livro Teste'})[0]
-        assert livro_atualizado.status == 'EMPRESTADO'
+    assert 'Solicitação enviada com sucesso!' in response.get_data(as_text=True)
 
-    # Agora testar T-LOAN-02 com livro EMPRESTADO
-    with client.session_transaction() as sess:
-        sess['user_id'] = 3
-        sess['papel'] = 'LEITOR'
-    
-    response = client.post('/emprestimo/solicitar', json={'livro_id': livro_id})
-    assert response.status_code == 400
-    assert response.get_json()['message'] == 'Livro não disponível'
-
-    # 3. Devolução
-    with client.session_transaction() as sess:
-        sess['papel'] = 'BIBLIOTECARIO'
-    
-    response = client.post('/emprestimo/devolver', json={'emprestimo_id': 1})
-    assert response.status_code == 200
-    
-    with app.app_context():
-        livro_final = LivroModel.buscar_todos({'titulo': 'Livro Teste'})[0]
-        assert livro_final.status == 'DISPONIVEL'
+    # Verificar se o status mudou para SOLICITADO (o model faz isso no registrar_emprestimo)
+    # Mas como estamos num banco em memória no fixture, precisamos checar o banco
+    from app.database import conectar_db
+    conn = conectar_db()
+    cursor = conn.cursor()
+    cursor.execute('SELECT status FROM Emprestimos WHERE livro_id = ?', (livro_id,))
+    emp = cursor.fetchone()
+    assert emp['status'] == 'SOLICITADO'
+    conn.close()

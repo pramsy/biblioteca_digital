@@ -1,64 +1,95 @@
 {% extends "layout.html" %}
 {% block title %}Catálogo - Biblioteca Digital{% endblock %}
+
 {% block content %}
-<div class="row mb-4">
+<header class="mb-5 text-center">
+    <h1 class="display-5 fw-bold">Catálogo de Livros</h1>
+    <p class="lead">Encontre sua próxima leitura em nosso acervo digital.</p>
+</header>
+
+<section class="row mb-5" aria-label="Filtros de Busca">
     <div class="col-md-12">
-        <div class="card p-3">
-            <form action="{{ url_for('livro.listar_livros') }}" method="GET" class="row g-3">
-                <div class="col-md-4">
-                    <input type="text" name="titulo" class="form-control" placeholder="Título" value="{{ request.args.get('titulo', '') }}">
+        <div class="card p-4 shadow-sm">
+            <form action="{{ url_for('livro.listar_livros') }}" method="GET" class="row g-3 align-items-end">
+                <div class="col-lg-4 col-md-6">
+                    <label for="titulo" class="form-label fw-semibold">Título</label>
+                    <input type="text" id="titulo" name="titulo" class="form-control" placeholder="Ex: Dom Casmurro" value="{{ request.args.get('titulo', '') }}">
                 </div>
-                <div class="col-md-3">
-                    <input type="text" name="autor" class="form-control" placeholder="Autor" value="{{ request.args.get('autor', '') }}">
+                <div class="col-lg-3 col-md-6">
+                    <label for="autor" class="form-label fw-semibold">Autor</label>
+                    <input type="text" id="autor" name="autor" class="form-control" placeholder="Ex: Machado de Assis" value="{{ request.args.get('autor', '') }}">
                 </div>
-                <div class="col-md-3">
-                    <input type="text" name="categoria" class="form-control" placeholder="Categoria" value="{{ request.args.get('categoria', '') }}">
+                <div class="col-lg-3 col-md-6">
+                    <label for="categoria" class="form-label fw-semibold">Categoria</label>
+                    <input type="text" id="categoria" name="categoria" class="form-control" placeholder="Ex: Literatura" value="{{ request.args.get('categoria', '') }}">
                 </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary w-100">Buscar</button>
+                <div class="col-lg-2 col-md-6">
+                    <button type="submit" class="btn btn-primary w-100 py-2">
+                        🔍 Buscar
+                    </button>
                 </div>
             </form>
         </div>
     </div>
-</div>
+</section>
 
-<div class="row row-cols-1 row-cols-md-3 g-4">
+<section class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4" aria-label="Lista de Livros">
     {% for livro in livros %}
     <div class="col">
-        <div class="card h-100">
+        <article class="card h-100 border-0">
             <div class="card-body">
-                <h5 class="card-title">{{ livro.titulo }}</h5>
-                <h6 class="card-subtitle mb-2 text-muted">{{ livro.autor }}</h6>
-                <p class="card-text"><span class="badge bg-secondary">{{ livro.categoria }}</span></p>
-                <p class="card-text">
-                    Status: 
+                <div class="mb-2">
+                    <span class="badge bg-info text-dark opacity-75">{{ livro.categoria }}</span>
+                </div>
+                <h2 class="h5 card-title mb-1 text-truncate" title="{{ livro.titulo }}">{{ livro.titulo }}</h2>
+                <p class="card-subtitle mb-3 text-muted small">{{ livro.autor }}</p>
+                
+                <div class="d-flex align-items-center mb-3">
+                    <span class="small fw-bold me-2">Status:</span>
                     {% if livro.status == 'DISPONIVEL' %}
                         <span class="badge bg-success">Disponível</span>
                     {% else %}
-                        <span class="badge bg-warning text-dark">Emprestado</span>
+                        <span class="badge bg-danger">Emprestado</span>
                     {% endif %}
-                </p>
+                </div>
             </div>
-            <div class="card-footer bg-transparent border-top-0">
-                {% if session.get('papel') == 'LEITOR' and livro.status == 'DISPONIVEL' %}
-                    <form action="{{ url_for('emprestimo.solicitar_emprestimo') }}" method="POST">
-                        <input type="hidden" name="livro_id" value="{{ livro.id }}">
-                        <button type="submit" class="btn btn-outline-primary btn-sm w-100">Solicitar Empréstimo</button>
-                    </form>
+            <div class="card-footer bg-transparent border-0 pb-3">
+                {% if session.get('papel') == 'LEITOR' %}
+                    {% if livro.status == 'DISPONIVEL' %}
+                        <form action="{{ url_for('emprestimo.solicitar_emprestimo') }}" method="POST">
+                            <input type="hidden" name="livro_id" value="{{ livro.id }}">
+                            <button type="submit" class="btn btn-outline-primary btn-sm w-100 fw-bold">Solicitar Empréstimo</button>
+                        </form>
+                    {% else %}
+                        <button class="btn btn-secondary btn-sm w-100" disabled aria-disabled="true">Indisponível</button>
+                    {% endif %}
+                {% elif not session.get('user_id') %}
+                    <a href="{{ url_for('auth.login_view') }}" class="btn btn-outline-secondary btn-sm w-100">Faça login para solicitar</a>
                 {% endif %}
             </div>
-        </div>
+        </article>
     </div>
     {% else %}
     <div class="col-12 text-center py-5">
-        <p class="text-muted">Nenhum livro encontrado no catálogo.</p>
+        <div class="mb-3 display-1 text-muted">📖</div>
+        <h3 class="text-muted">Nenhum livro encontrado</h3>
+        <p class="text-muted">Tente ajustar seus filtros de busca para encontrar o que procura.</p>
+        <a href="{{ url_for('livro.listar_livros') }}" class="btn btn-link">Ver todo o catálogo</a>
     </div>
     {% endfor %}
-</div>
+</section>
 
 {% if session.get('papel') in ['ADMIN', 'BIBLIOTECARIO', 'ADMIN_INICIAL'] %}
-<div class="fixed-bottom p-4 text-end">
-    <a href="{{ url_for('livro.admin_dashboard') }}" class="btn btn-dark shadow">Gerenciar Acervo</a>
+<div class="fixed-bottom p-4 text-end d-none d-md-block">
+    <a href="{{ url_for('livro.admin_dashboard') }}" class="btn btn-dark shadow-lg px-4 py-2">
+        ⚙️ Gerenciar Acervo
+    </a>
+</div>
+{# Botão flutuante para mobile #}
+<div class="fixed-bottom p-3 text-end d-md-none">
+    <a href="{{ url_for('livro.admin_dashboard') }}" class="btn btn-dark btn-lg rounded-circle shadow-lg" aria-label="Gerenciar Acervo">
+        ⚙️
+    </a>
 </div>
 {% endif %}
 {% endblock %}

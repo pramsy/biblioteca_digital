@@ -1,25 +1,66 @@
 {% extends "layout.html" %}
 {% block title %}Login - Biblioteca Digital{% endblock %}
+
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-4">
-        <div class="card p-4">
-            <h2 class="text-center mb-4">Entrar</h2>
-            <form action="{{ url_for('auth.login') }}" method="POST">
+<div class="row justify-content-center align-items-center" style="min-height: 70vh;">
+    <div class="col-lg-4 col-md-6 col-sm-10">
+        <div class="card p-4 shadow-lg border-0">
+            <header class="text-center mb-4">
+                <h1 class="h3 fw-bold">Bem-vindo de volta</h1>
+                <p class="text-muted">Acesse sua conta para continuar</p>
+            </header>
+            
+            <form action="{{ url_for('auth.login') }}" method="POST" novalidate class="needs-validation">
                 <div class="mb-3">
-                    <label for="email" class="form-label">Email</label>
-                    <input type="email" name="email" id="email" class="form-control" required placeholder="admin@empresa.com">
+                    <label for="email" class="form-label fw-semibold">Email <span class="text-danger">*</span></label>
+                    <input type="email" name="email" id="email" class="form-control" required placeholder="seu@email.com" aria-describedby="emailHelp">
+                    <div id="emailHelp" class="form-text">Nunca compartilharemos seu email.</div>
+                    <div class="invalid-feedback">
+                        Por favor, insira um endereço de email válido.
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label for="senha" class="form-label">Senha</label>
-                    <input type="password" name="senha" id="senha" class="form-control" required>
+                
+                <div class="mb-4">
+                    <label for="senha" class="form-label fw-semibold">Senha <span class="text-danger">*</span></label>
+                    <input type="password" name="senha" id="senha" class="form-control" required placeholder="Sua senha">
+                    <div class="invalid-feedback">
+                        Sua senha é obrigatória.
+                    </div>
                 </div>
-                <button type="submit" class="btn btn-primary w-100">Entrar</button>
+                
+                <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">
+                    Entrar
+                </button>
             </form>
-            <div class="text-center mt-3">
-                <p>Não tem uma conta? <a href="{{ url_for('auth.cadastro_view') }}">Cadastre-se como Leitor</a></p>
-            </div>
+            
+            <footer class="text-center mt-4 pt-3 border-top">
+                <p class="mb-0 text-muted">Ainda não tem uma conta?</p>
+                <a href="{{ url_for('auth.cadastro_view') }}" class="fw-bold text-decoration-none">Cadastre-se como Leitor</a>
+            </footer>
         </div>
     </div>
 </div>
+
+<script>
+    // Script de validação do Bootstrap
+    (function () {
+        'use strict'
+        var forms = document.querySelectorAll('.needs-validation')
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                    // Se inválido, removemos a classe de loading que o script global adiciona
+                    const btn = form.querySelector('button[type="submit"]');
+                    if (btn) {
+                        btn.classList.remove('btn-loading');
+                        btn.disabled = false;
+                    }
+                }
+                form.classList.add('was-validated')
+            }, false)
+        })
+    })()
+</script>
 {% endblock %}

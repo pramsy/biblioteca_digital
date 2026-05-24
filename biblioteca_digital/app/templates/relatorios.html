@@ -1,55 +1,74 @@
 {% extends "layout.html" %}
 {% block title %}Relatórios - Biblioteca Digital{% endblock %}
+
 {% block content %}
-<div class="row mb-4">
-    <div class="col-md-12">
-        <h2 class="mb-4">Dashboard de Relatórios</h2>
-    </div>
-</div>
+<header class="mb-5">
+    <h1 class="h2 fw-bold">Estatísticas e Relatórios</h1>
+    <p class="text-muted">Acompanhe o desempenho e a utilização do acervo digital.</p>
+</header>
 
-<div class="row g-4">
-    <div class="col-md-4">
-        <div class="card text-white bg-primary h-100">
-            <div class="card-body text-center">
-                <h5 class="card-title">Total de Empréstimos</h5>
-                <p class="display-4">{{ total_emprestimos }}</p>
-                <p class="card-text">Registrados desde o início</p>
+<div class="row g-4 mb-5">
+    <!-- Card Principal de Resumo -->
+    <div class="col-lg-4 col-md-6">
+        <article class="card h-100 border-0 shadow-sm bg-primary text-white overflow-hidden position-relative">
+            <div class="card-body p-4 position-relative" style="z-index: 2;">
+                <h2 class="h5 fw-normal opacity-75">Total de Empréstimos</h2>
+                <div class="display-3 fw-bold my-2">{{ total_emprestimos }}</div>
+                <p class="mb-0 small opacity-75">Soma total de solicitações processadas</p>
             </div>
-        </div>
+            <div class="position-absolute bottom-0 end-0 p-3 opacity-25" style="z-index: 1;">
+                <span style="font-size: 6rem;">📊</span>
+            </div>
+        </article>
     </div>
 
-    <div class="col-md-4">
-        <div class="card h-100 p-3">
-            <h5>Top 5 Livros</h5>
-            <hr>
-            <ul class="list-group list-group-flush">
-                {% for livro in top_livros %}
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    {{ livro.titulo }}
-                    <span class="badge bg-primary rounded-pill">{{ livro.total }}</span>
-                </li>
-                {% else %}
-                <li class="list-group-item text-muted text-center">Sem dados suficientes</li>
-                {% endfor %}
-            </ul>
-        </div>
+    <!-- Top Livros -->
+    <div class="col-lg-4 col-md-6">
+        <section class="card h-100 border-0 shadow-sm" aria-labelledby="top-books-title">
+            <div class="card-body p-4">
+                <h2 id="top-books-title" class="h5 fw-bold mb-4">🏆 Livros mais Procurados</h2>
+                <div class="list-group list-group-flush">
+                    {% for livro in top_livros %}
+                    <div class="list-group-item d-flex justify-content-between align-items-center px-0 bg-transparent">
+                        <div class="text-truncate me-3" title="{{ livro.titulo }}">{{ livro.titulo }}</div>
+                        <span class="badge bg-primary rounded-pill px-3">{{ livro.total }}</span>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4 text-muted">
+                        <p class="mb-0">Sem dados suficientes para gerar o ranking.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
     </div>
 
-    <div class="col-md-4">
-        <div class="card h-100 p-3">
-            <h5>Distribuição por Categoria</h5>
-            <hr>
-            <ul class="list-group list-group-flush">
-                {% for cat in distribuicao_categorias %}
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    {{ cat.categoria }}
-                    <span class="badge bg-secondary rounded-pill">{{ cat.total }}</span>
-                </li>
-                {% else %}
-                <li class="list-group-item text-muted text-center">Sem dados suficientes</li>
-                {% endfor %}
-            </ul>
-        </div>
+    <!-- Categorias -->
+    <div class="col-lg-4 col-md-12">
+        <section class="card h-100 border-0 shadow-sm" aria-labelledby="categories-title">
+            <div class="card-body p-4">
+                <h2 id="categories-title" class="h5 fw-bold mb-4">🏷️ Distribuição por Categoria</h2>
+                <div class="list-group list-group-flush">
+                    {% for cat in distribuicao_categorias %}
+                    <div class="list-group-item d-flex justify-content-between align-items-center px-0 bg-transparent">
+                        <span>{{ cat.categoria }}</span>
+                        <span class="badge bg-secondary-subtle text-secondary rounded-pill px-3">{{ cat.total }}</span>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4 text-muted">
+                        <p class="mb-0">Sem registros de categorias.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
     </div>
 </div>
+
+<footer class="alert alert-info border-0 shadow-sm d-flex align-items-center" role="status">
+    <div class="me-3 fs-3">ℹ️</div>
+    <div>
+        <strong>Nota:</strong> Os dados acima são atualizados em tempo real conforme as movimentações no sistema.
+    </div>
+</footer>
 {% endblock %}

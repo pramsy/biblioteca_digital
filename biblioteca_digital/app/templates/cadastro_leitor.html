@@ -1,29 +1,74 @@
 {% extends "layout.html" %}
 {% block title %}Cadastro de Leitor - Biblioteca Digital{% endblock %}
+
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-4">
-        <div class="card p-4">
-            <h2 class="text-center mb-4">Novo Leitor</h2>
-            <form action="{{ url_for('auth.cadastrar_leitor') }}" method="POST">
+<div class="row justify-content-center align-items-center" style="min-height: 70vh;">
+    <div class="col-lg-5 col-md-7 col-sm-10">
+        <div class="card p-4 shadow-lg border-0">
+            <header class="text-center mb-4">
+                <h1 class="h3 fw-bold">Criar Nova Conta</h1>
+                <p class="text-muted">Junte-se à nossa comunidade de leitores</p>
+            </header>
+            
+            <form action="{{ url_for('auth.cadastrar_leitor') }}" method="POST" novalidate class="needs-validation">
                 <div class="mb-3">
-                    <label for="nome" class="form-label">Nome Completo</label>
-                    <input type="text" name="nome" id="nome" class="form-control" required>
+                    <label for="nome" class="form-label fw-semibold">Nome Completo <span class="text-danger">*</span></label>
+                    <input type="text" name="nome" id="nome" class="form-control" required placeholder="Ex: João da Silva">
+                    <div class="invalid-feedback">
+                        O nome completo é obrigatório.
+                    </div>
                 </div>
+
                 <div class="mb-3">
-                    <label for="email" class="form-label">Email</label>
-                    <input type="email" name="email" id="email" class="form-control" required>
+                    <label for="email" class="form-label fw-semibold">Email <span class="text-danger">*</span></label>
+                    <input type="email" name="email" id="email" class="form-control" required placeholder="seu@email.com">
+                    <div class="invalid-feedback">
+                        Por favor, insira um endereço de email válido.
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label for="senha" class="form-label">Senha</label>
-                    <input type="password" name="senha" id="senha" class="form-control" required>
+                
+                <div class="mb-4">
+                    <label for="senha" class="form-label fw-semibold">Senha <span class="text-danger">*</span></label>
+                    <input type="password" name="senha" id="senha" class="form-control" required placeholder="Crie uma senha segura" minlength="6">
+                    <div class="form-text">Mínimo de 6 caracteres.</div>
+                    <div class="invalid-feedback">
+                        A senha deve ter pelo menos 6 caracteres.
+                    </div>
                 </div>
-                <button type="submit" class="btn btn-success w-100">Criar Conta</button>
+                
+                <button type="submit" class="btn btn-success w-100 py-2 fw-bold shadow-sm">
+                    ✅ Criar Minha Conta
+                </button>
             </form>
-            <div class="text-center mt-3">
-                <p>Já tem uma conta? <a href="{{ url_for('auth.login_view') }}">Faça login</a></p>
-            </div>
+            
+            <footer class="text-center mt-4 pt-3 border-top">
+                <p class="mb-0 text-muted">Já possui uma conta?</p>
+                <a href="{{ url_for('auth.login_view') }}" class="fw-bold text-decoration-none">Faça login aqui</a>
+            </footer>
         </div>
     </div>
 </div>
+
+<script>
+    // Script de validação do Bootstrap
+    (function () {
+        'use strict'
+        var forms = document.querySelectorAll('.needs-validation')
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                    // Se inválido, removemos a classe de loading que o script global adiciona
+                    const btn = form.querySelector('button[type="submit"]');
+                    if (btn) {
+                        btn.classList.remove('btn-loading');
+                        btn.disabled = false;
+                    }
+                }
+                form.classList.add('was-validated')
+            }, false)
+        })
+    })()
+</script>
 {% endblock %}

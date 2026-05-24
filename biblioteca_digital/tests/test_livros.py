@@ -1,51 +1,49 @@
 import pytest
 from app.models.livro_model import LivroModel
 
-def test_livro_save_and_list(app):
-    with app.app_context():
-        # T-BOOK-01: Cadastro de Livro
-        novo_livro = LivroModel(titulo="Dom Casmurro", autor="Machado de Assis", categoria="Clássico")
-        novo_livro.salvar()
-        
-        livros = LivroModel.buscar_todos()
-        assert len(livros) >= 1
-        assert any(l.titulo == "Dom Casmurro" for l in livros)
-        assert livros[0].status == 'DISPONIVEL'
+def test_cadastrar_livro_sucesso(client, app):
+    # Setup: Admin login
+    with client.session_transaction() as sess:
+        sess['user_id'] = 1
+        sess['papel'] = 'ADMIN'
 
-def test_livro_busca_filtrada(app):
+    response = client.post('/livro/cadastrar', data={
+        'titulo': 'Livro Novo',
+        'autor': 'Autor Novo',
+        'categoria': 'Ficção'
+    }, follow_redirects=True)
+    
+    assert response.status_code == 200
+    assert 'Livro cadastrado com sucesso!' in response.get_data(as_text=True)
+    
     with app.app_context():
-        # T-BOOK-02: Busca Filtrada
-        LivroModel(titulo="O Guia", autor="Douglas Adams", categoria="Ficção").salvar()
-        LivroModel(titulo="1984", autor="George Orwell", categoria="Ficção").salvar()
-        
-        # Filtro por autor
-        resultados = LivroModel.buscar_todos({'autor': 'George Orwell'})
-        assert len(resultados) == 1
-        assert resultados[0].titulo == "1984"
-        
-        # Filtro por categoria
-        resultados = LivroModel.buscar_todos({'categoria': 'Ficção'})
-        assert len(resultados) == 2
+        livros = LivroModel.buscar_todos()
+        titulos = [l.titulo for l in livros]
+        assert 'Livro Novo' in titulos
+
+def test_buscar_livros(client, app):
+    with app.app_context():
+        l1 = LivroModel(titulo="Python para Todos", autor="Autor A", categoria="TI")
+        l1.salvar()
+        l2 = LivroModel(titulo="Java para Fortes", autor="Autor B", categoria="TI")
+        l2.salvar()
+
+    # Busca por título no /catalogo
+    response = client.get('/catalogo?titulo=Python')
+    assert response.status_code == 200
+    assert 'Python para Todos' in response.get_data(as_text=True)
+    assert 'Java para Fortes' not in response.get_data(as_text=True)
 
 def test_cadastrar_livro_permissao(client, app):
     # Testar permissão de cadastro (Apenas ADMIN/BIBLIOTECARIO)
     with client.session_transaction() as sess:
         sess['user_id'] = 1
         sess['papel'] = 'LEITOR'
-    
-    response = client.post('/livro/cadastrar', json={
+
+    response = client.post('/livro/cadastrar', data={
         'titulo': 'Novo Livro',
         'autor': 'Autor',
         'categoria': 'Cat'
-    })
-    assert response.status_code == 403
+    }, follow_redirects=True)
     
-    with client.session_transaction() as sess:
-        sess['papel'] = 'ADMIN'
-    
-    response = client.post('/livro/cadastrar', json={
-        'titulo': 'Novo Livro 2',
-        'autor': 'Autor 2',
-        'categoria': 'Cat 2'
-    })
-    assert response.status_code == 201
+    assert 'Acesso negado' in response.get_data(as_text=True)

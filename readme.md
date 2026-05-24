@@ -1,56 +1,56 @@
-# Sistema de Biblioteca Digital
+# Sistema de Biblioteca Digital - UAB IFTO
 
-Este é um sistema de gerenciamento de biblioteca digital desenvolvido com Flask e SQLite, seguindo uma arquitetura modular e práticas de TDD.
+Sistema de gerenciamento de biblioteca digital focado em acessibilidade, responsividade e experiência do usuário.
 
-## Funcionalidades
+## 🚀 Novidades da Versão (Refinamento Frontend)
 
-- **Autenticação e Autorização**: Controle de acesso baseado em papéis (Admin Inicial, Admin, Bibliotecário e Leitor).
-- **Gestão de Livros**: Catálogo completo com busca por título, autor e categoria.
-- **Fluxo de Empréstimos**: Ciclo completo de solicitação, aprovação e devolução de livros.
-- **Relatórios**: Métricas de uso do sistema para administradores.
+Esta versão foca na modernização da interface e melhoria da acessibilidade:
+- **Design System**: Padronização visual baseada em Bootstrap 5 com feedback tátil e visual.
+- **Acessibilidade**: Conformidade básica com WCAG (ARIA roles, contraste, navegação por teclado).
+- **Responsividade**: Layout adaptável para Mobile, Tablet e Desktop.
+- **Validations & Feedback**: Estados de carregamento (spinners), validações em tempo real e mensagens claras.
 
-## Requisitos Técnicos
+## 📋 Documentação
 
-- Python 3.10+
-- Flask 3.0.0
-- SQLite
+A documentação detalhada foi subdividida para melhor manutenção:
+- [Especificação de Requisitos e UI](01markdow.md)
+- [Plano de Testes de Frontend](doc/testing.md)
 
-## Instalação
+## 🛠️ Tecnologias
 
-1. Clone o repositório.
-2. Crie um ambiente virtual:
+- **Backend**: Flask 3.0, SQLite
+- **Frontend**: Jinja2, Bootstrap 5, Vanilla JS
+- **Testes**: Pytest
+
+## 🔧 Instalação e Execução
+
+1. **Dependências**:
    ```bash
    python3 -m venv venv
    source venv/bin/activate
-   ```
-3. Instale as dependências:
-   ```bash
    pip install -r biblioteca_digital/requirements.txt
    ```
-4. Configure o arquivo `.env` (use `.env.example` como base).
 
-## Execução
+2. **Configuração**:
+   Copie o `.env.example` para `.env` e ajuste as variáveis.
 
-Para iniciar o servidor de desenvolvimento:
-```bash
-cd biblioteca_digital
-python run.py
-```
+3. **Execução**:
+   ```bash
+   cd biblioteca_digital
+   python run.py
+   ```
 
-## Testes
+## 🧪 Testes Automatizados
 
-Para executar a suíte de testes automatizados:
+Para garantir a integridade do sistema após as mudanças:
 ```bash
 cd biblioteca_digital
 PYTHONPATH=. pytest
 ```
 
-## Estrutura do Projeto
+## ♿ Acessibilidade
 
-- `app/`: Código fonte da aplicação.
-  - `controllers/`: Gerenciamento de rotas e lógica de negócio.
-  - `models/`: Definições de dados e persistência.
-  - `templates/`: Interface do usuário (HTML/Jinja2).
-- `tests/`: Testes automatizados (TDD).
-- `config.py`: Configurações centralizadas.
-- `run.py`: Ponto de entrada.
+O sistema foi testado para garantir:
+- Navegação lógica via tecla `TAB`.
+- Indicações visuais de foco em todos os elementos interativos.
+- Suporte a leitores de tela através de atributos ARIA.
