@@ -1,0 +1,65 @@
+{% extends "layout.html" %}
+{% block title %}Livros Devolvidos - Biblioteca Digital{% endblock %}
+
+{% block content %}
+<header class="mb-4 d-flex justify-content-between align-items-center">
+    <div>
+        <h1 class="h2 fw-bold">Histórico de Devoluções</h1>
+        <p class="text-muted">Consulta de livros devolvidos ao acervo.</p>
+    </div>
+    <a href="{{ url_for('livro.admin_dashboard') }}" class="btn btn-outline-secondary">Voltar ao Painel</a>
+</header>
+
+<section class="card shadow-sm border-0 mb-4">
+    <div class="card-body p-4">
+        <form method="GET" class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label for="data_devolucao" class="form-label fw-bold">Filtrar por Data de Devolução</label>
+                <input type="date" name="data_devolucao" id="data_devolucao" class="form-control" value="{{ data_busca or '' }}">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">🔍 Pesquisar</button>
+            </div>
+            <div class="col-md-2">
+                <a href="{{ url_for('emprestimo.listar_devolvidos') }}" class="btn btn-link">Limpar Filtro</a>
+            </div>
+        </form>
+    </div>
+</section>
+
+<section class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Livro</th>
+                        <th>Usuário</th>
+                        <th>Data de Devolução</th>
+                        <th class="text-center">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in devolvidos %}
+                    <tr>
+                        <td class="ps-4 fw-medium">{{ item.titulo }}</td>
+                        <td>{{ item.usuario }}</td>
+                        <td>{{ item.data_devolucao }}</td>
+                        <td class="text-center">
+                            <span class="badge bg-success-subtle text-success border border-success px-3">Devolvido</span>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center py-5 text-muted">
+                            <div class="fs-1 mb-2">📂</div>
+                            Nenhuma devolução encontrada para esta data.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% endblock %}

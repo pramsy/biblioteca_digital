@@ -10,16 +10,17 @@ def verificar_permissao(papeis_permitidos):
 @relatorio_bp.route('/relatorios', methods=['GET'])
 def gerar_relatorios():
     if not verificar_permissao(['ADMIN', 'BIBLIOTECARIO', 'ADMIN_INICIAL']):
-        return jsonify({'message': 'Acesso negado'}), 403
+        flash('Acesso negado', 'danger')
+        return redirect(url_for('livro.listar_livros'))
     
     conn = conectar_db()
     cursor = conn.cursor()
     
-    # Contagem de empréstimos
+    # Contagem de empréstimos por período (exemplo: total)
     cursor.execute('SELECT COUNT(*) FROM Emprestimos')
     total_emprestimos = cursor.fetchone()[0]
     
-    # Top livros (simplificado)
+    # Top livros (mais emprestados)
     cursor.execute('''
         SELECT L.titulo, COUNT(E.id) as total 
         FROM Livros L 

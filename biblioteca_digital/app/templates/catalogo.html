@@ -48,6 +48,8 @@
                     <span class="small fw-bold me-2">Status:</span>
                     {% if livro.status == 'DISPONIVEL' %}
                         <span class="badge bg-success">Disponível</span>
+                    {% elif livro.status == 'REQUISITADO' %}
+                        <span class="badge bg-warning text-dark">Requisitado</span>
                     {% else %}
                         <span class="badge bg-danger">Emprestado</span>
                     {% endif %}
@@ -57,6 +59,7 @@
                 {% if session.get('papel') == 'LEITOR' %}
                     {% if livro.status == 'DISPONIVEL' %}
                         <form action="{{ url_for('emprestimo.solicitar_emprestimo') }}" method="POST">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                             <input type="hidden" name="livro_id" value="{{ livro.id }}">
                             <button type="submit" class="btn btn-outline-primary btn-sm w-100 fw-bold">Solicitar Empréstimo</button>
                         </form>

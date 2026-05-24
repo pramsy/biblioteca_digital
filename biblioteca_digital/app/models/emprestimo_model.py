@@ -39,6 +39,19 @@ class EmprestimoModel:
             conn.close()
         
     @staticmethod
+    def deletar(id):
+        conn = conectar_db()
+        try:
+            cursor = conn.cursor()
+            cursor.execute('DELETE FROM Emprestimos WHERE id = ?', (id,))
+            conn.commit()
+            return True
+        except Exception:
+            return False
+        finally:
+            conn.close()
+
+    @staticmethod
     def buscar_por_id(id):
         conn = conectar_db()
         try:

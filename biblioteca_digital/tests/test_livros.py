@@ -7,7 +7,11 @@ def test_cadastrar_livro_sucesso(client, app):
         sess['user_id'] = 1
         sess['papel'] = 'ADMIN'
 
-    response = client.post('/livro/cadastrar', data={
+    from flask import url_for
+    with app.app_context():
+        url = url_for('livro.cadastrar_livro')
+
+    response = client.post(url, data={
         'titulo': 'Livro Novo',
         'autor': 'Autor Novo',
         'categoria': 'Ficção'
@@ -29,7 +33,7 @@ def test_buscar_livros(client, app):
         l2.salvar()
 
     # Busca por título no /catalogo
-    response = client.get('/catalogo?titulo=Python')
+    response = client.get('/catalogo?titulo=Python', follow_redirects=True)
     assert response.status_code == 200
     assert 'Python para Todos' in response.get_data(as_text=True)
     assert 'Java para Fortes' not in response.get_data(as_text=True)

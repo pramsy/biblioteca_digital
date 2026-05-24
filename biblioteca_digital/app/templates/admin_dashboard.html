@@ -2,14 +2,33 @@
 {% block title %}Painel Administrativo - Biblioteca Digital{% endblock %}
 
 {% block content %}
-<header class="mb-4">
-    <h1 class="h2 fw-bold">Painel de Gestão</h1>
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url_for('livro.listar_livros') }}">Catálogo</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Administração</li>
-        </ol>
-    </nav>
+<header class="mb-4 d-flex justify-content-between align-items-wrap">
+    <div>
+        <h1 class="h2 fw-bold">Painel de Gestão</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('livro.listar_livros') }}">Catálogo</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Administração</li>
+            </ol>
+        </nav>
+    </div>
+    <div class="d-flex gap-2 align-items-start">
+        <div class="dropdown">
+            <button class="btn btn-dark dropdown-toggle" type="button" id="userMgmt" data-bs-toggle="dropdown">
+                👤 Gestão de Usuários
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+                {% if session.get('papel') == 'ADMIN_INICIAL' %}
+                <li><a class="dropdown-item" href="{{ url_for('admin.cadastrar_admin_view') }}">Cadastrar Administrador</a></li>
+                {% endif %}
+                {% if session.get('papel') in ['ADMIN_INICIAL', 'ADMIN'] %}
+                <li><a class="dropdown-item" href="{{ url_for('admin.cadastrar_bibliotecario_view') }}">Cadastrar Bibliotecário</a></li>
+                {% endif %}
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="{{ url_for('emprestimo.listar_devolvidos') }}">🕒 Histórico de Devoluções</a></li>
+            </ul>
+        </div>
+    </div>
 </header>
 
 <div class="row g-4">
@@ -19,6 +38,7 @@
             <div class="card-body p-4">
                 <h2 id="form-title" class="h5 fw-bold mb-4">🆕 Cadastrar Novo Livro</h2>
                 <form action="{{ url_for('livro.cadastrar_livro') }}" method="POST" class="needs-validation" novalidate>
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                     <div class="mb-3">
                         <label for="titulo" class="form-label fw-semibold">Título <span class="text-danger">*</span></label>
                         <input type="text" id="titulo" name="titulo" class="form-control" required placeholder="Título do livro">
@@ -42,8 +62,22 @@
     <!-- Tabela de Empréstimos -->
     <div class="col-lg-8">
         <section class="card shadow-sm border-0 mb-4" aria-labelledby="loans-title">
+            <div class="card-header bg-white border-0 pt-4 px-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h2 id="loans-title" class="h5 fw-bold mb-0">🤝 Gerenciar Empréstimos</h2>
+                    <div class="btn-group btn-group-sm">
+                        <a href="{{ url_for('livro.admin_dashboard', status='SOLICITADO') }}" 
+                           class="btn btn-outline-primary {% if filtro_atual == 'SOLICITADO' %}active{% endif %}">
+                            Aguardando Aprovação
+                        </a>
+                        <a href="{{ url_for('livro.admin_dashboard', status='ATIVO') }}" 
+                           class="btn btn-outline-primary {% if filtro_atual == 'ATIVO' %}active{% endif %}">
+                            Emprestados
+                        </a>
+                    </div>
+                </div>
+            </div>
             <div class="card-body p-4">
-                <h2 id="loans-title" class="h5 fw-bold mb-4">🤝 Gerenciar Empréstimos</h2>
                 <div class="table-responsive">
                     <table class="table table-hover align-middle">
                         <thead class="table-light">
@@ -69,24 +103,33 @@
                                     {% endif %}
                                 </td>
                                 <td class="text-end">
-                                    {% if emp.status == 'SOLICITADO' %}
-                                        <form action="{{ url_for('emprestimo.aprovar_emprestimo') }}" method="POST" class="d-inline">
-                                            <input type="hidden" name="emprestimo_id" value="{{ emp.id }}">
-                                            <button type="submit" class="btn btn-success btn-sm px-3">Aprovar</button>
-                                        </form>
-                                    {% elif emp.status == 'ATIVO' %}
-                                        <form action="{{ url_for('emprestimo.devolver_emprestimo') }}" method="POST" class="d-inline">
-                                            <input type="hidden" name="emprestimo_id" value="{{ emp.id }}">
-                                            <button type="submit" class="btn btn-primary btn-sm px-3">Receber Devolução</button>
-                                        </form>
-                                    {% endif %}
+                                    <div class="d-flex justify-content-end gap-2">
+                                        {% if emp.status == 'SOLICITADO' %}
+                                            <form action="{{ url_for('emprestimo.aprovar_emprestimo') }}" method="POST">
+                                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                                <input type="hidden" name="emprestimo_id" value="{{ emp.id }}">
+                                                <button type="submit" class="btn btn-success btn-sm">Aprovar</button>
+                                            </form>
+                                            <form action="{{ url_for('emprestimo.excluir_emprestimo') }}" method="POST">
+                                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                                <input type="hidden" name="emprestimo_id" value="{{ emp.id }}">
+                                                <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Excluir esta solicitação?')">Excluir</button>
+                                            </form>
+                                        {% elif emp.status == 'ATIVO' %}
+                                            <form action="{{ url_for('emprestimo.devolver_emprestimo') }}" method="POST">
+                                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                                <input type="hidden" name="emprestimo_id" value="{{ emp.id }}">
+                                                <button type="submit" class="btn btn-primary btn-sm">Receber Devolução</button>
+                                            </form>
+                                        {% endif %}
+                                    </div>
                                 </td>
                             </tr>
                             {% else %}
                             <tr>
                                 <td colspan="4" class="text-center py-4 text-muted">
                                     <div class="mb-2">📭</div>
-                                    Nenhuma solicitação ou empréstimo ativo no momento.
+                                    Nenhum registro encontrado para este filtro.
                                 </td>
                             </tr>
                             {% endfor %}

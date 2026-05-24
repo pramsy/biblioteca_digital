@@ -1,6 +1,6 @@
 from flask import Blueprint, request, session, redirect, url_for, render_template, flash
 from app.models.usuario_model import UsuarioModel
-import hashlib
+from werkzeug.security import generate_password_hash, check_password_hash
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -20,7 +20,7 @@ def login():
     senha = data.get('senha')
     
     usuario = UsuarioModel.buscar_por_email(email)
-    if usuario and usuario.senha_hash == hashlib.sha256(senha.encode()).hexdigest():
+    if usuario and check_password_hash(usuario.senha_hash, senha):
         session['user_id'] = usuario.id
         session['papel'] = usuario.papel
         session['nome'] = usuario.nome
@@ -49,7 +49,7 @@ def cadastrar_leitor():
         flash('Email já cadastrado', 'warning')
         return redirect(url_for('auth.cadastro_view'))
         
-    senha_hash = hashlib.sha256(senha.encode()).hexdigest()
+    senha_hash = generate_password_hash(senha)
     novo_usuario = UsuarioModel(nome=nome, email=email, senha_hash=senha_hash, papel='LEITOR')
     novo_usuario.salvar()
     

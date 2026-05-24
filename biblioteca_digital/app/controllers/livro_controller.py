@@ -19,24 +19,28 @@ def admin_dashboard():
         flash('Acesso negado', 'danger')
         return redirect(url_for('livro.listar_livros'))
     
+    filtro_status = request.args.get('status', 'SOLICITADO') # Padrão: Pendentes
     livros = LivroModel.buscar_todos()
     
-    # Buscar empréstimos pendentes e ativos para o painel
     from app.database import conectar_db
     conn = conectar_db()
     cursor = conn.cursor()
     
+    # Gerenciar empréstimos conforme o filtro
     cursor.execute('''
         SELECT E.id, L.titulo, U.nome as usuario, E.status, E.data_solicitacao 
         FROM Emprestimos E
         JOIN Livros L ON E.livro_id = L.id
         JOIN Usuarios U ON E.usuario_id = U.id
-        WHERE E.status IN ('SOLICITADO', 'ATIVO')
-    ''')
+        WHERE E.status = ?
+    ''', (filtro_status,))
     emprestimos = [dict(row) for row in cursor.fetchall()]
     conn.close()
     
-    return render_template('admin_dashboard.html', livros=livros, emprestimos=emprestimos)
+    return render_template('admin_dashboard.html', 
+                          livros=livros, 
+                          emprestimos=emprestimos, 
+                          filtro_atual=filtro_status)
 
 @livro_bp.route('/livro/cadastrar', methods=['POST'])
 def cadastrar_livro():
@@ -44,11 +48,7 @@ def cadastrar_livro():
         flash('Acesso negado', 'danger')
         return redirect(url_for('livro.listar_livros'))
     
-    if request.is_json:
-        data = request.get_json()
-    else:
-        data = request.form
-        
+    data = request.form
     novo_livro = LivroModel(titulo=data.get('titulo'), autor=data.get('autor'), categoria=data.get('categoria'))
     novo_livro.salvar()
     

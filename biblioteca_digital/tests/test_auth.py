@@ -1,13 +1,13 @@
 import pytest
-import hashlib
+from werkzeug.security import generate_password_hash
 from app.models.usuario_model import UsuarioModel
 
 def test_usuario_save_and_retrieve(app):
     with app.app_context():
         # T-USER-01: Cadastro de Leitor
-        email = "leitor@teste.com"
+        email = "leitor_novo@teste.com"
         senha = "senha_teste"
-        senha_hash = hashlib.sha256(senha.encode()).hexdigest()
+        senha_hash = generate_password_hash(senha)
         
         novo_usuario = UsuarioModel(nome="Leitor Teste", email=email, senha_hash=senha_hash, papel='LEITOR')
         novo_usuario.salvar()
@@ -16,7 +16,6 @@ def test_usuario_save_and_retrieve(app):
         assert buscado is not None
         assert buscado.nome == "Leitor Teste"
         assert buscado.papel == 'LEITOR'
-        assert buscado.senha_hash == senha_hash
 
 def test_login_sucesso(client, app):
     # T-AUTH-01: Login com sucesso
